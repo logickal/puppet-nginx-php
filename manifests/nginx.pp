@@ -73,8 +73,8 @@ define nginxphp::nginx_addphpconfig (
   $config_template    = "nginxphp/nginx.php.conf.erb") {
   file { "nginx-conf-${name}":
     path    => "/etc/nginx/sites-available/${name}.conf",
-    owner   => 'root',
-    group   => 'root',
+    owner   => 'www-data',
+    group   => 'www-data',
     mode    => 644,
     require => Package['nginx'],
     content => template("nginxphp/nginx.php.conf.erb")
@@ -86,6 +86,15 @@ define nginxphp::nginx_addphpconfig (
     ensure  => link,
     notify  => Service['nginx'],
     require => [File["nginx-conf-${name}"], File['default-nginx-disable'], Package['php5-fpm']]
+  }
+
+  file { "${name}.access.log" :
+    path => "/var/log/nginx/${name}.access.log",
+    ensure => present,
+    notify => Service['nginx'],
+    owner => 'www-data',
+    group => 'www-data',
+    require => [File["nginx-conf-${name}"], Package['php5-fpm'], Package['nginx'] ]
   }
 }
 

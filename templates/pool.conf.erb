@@ -311,7 +311,7 @@ slowlog = /var/log/$pool.log.slow
 ; Available units: s(econds)(default), m(inutes), h(ours), or d(ays)
 ; Default Value: 0
 <% if @php_devmode %>
-request_slowlog_timeout = 2s
+request_slowlog_timeout = 60s
 <% end %>
 
  

@@ -59,6 +59,15 @@ class nginxphp::php($php_packages){
       ensure => latest,
       notify => Service["php5-fpm"],
   }
+
+  file {
+    'php.ini' :
+      path => '/etc/php5/fpm/php.ini',
+      ensure => present,
+      notify => Service['php5-fpm'],
+      require => Package['php5-fpm'],
+      content => template("nginxphp/php.ini")
+  }
 }
 
 # Function: cmantix/nginxphp::fpmconfig
@@ -88,16 +97,16 @@ class nginxphp::php($php_packages){
 #
 define nginxphp::fpmconfig (
     $php_devmode         = false,
-	  $fpm_user            = 'www-data',
-	  $fpm_group            = 'www-data',
+	  $fpm_user            = 'vagrant',
+	  $fpm_group            = 'vagrant',
 	  $fpm_listen          = '127.0.0.1:9002',
 	  $fpm_allowed_clients = '127.0.0.1'
   ){
   # set config file for the pool  
   file {"fpm-pool-${name}":
     path => "/etc/php5/fpm/pool.d/${name}.conf",
-    owner   => 'root',
-    group   => 'root',
+    owner   => 'vagrant',
+    group   => 'vagrant',
     mode    => 644,
     notify  => Service['php5-fpm'],
     require => Package['php5-fpm'],

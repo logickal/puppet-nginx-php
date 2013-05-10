@@ -20,6 +20,24 @@ server {
     
     charset utf-8;
 
+    client_max_body_size 20M;
+    proxy_read_timeout 360s;
+
+    location = /favicon.ico {
+    	     log_not_found off;
+	     access_log off;
+    }
+
+    location = /robots.txt {
+    	     allow all;
+	     log_not_found off;
+	     access_log off;
+    }
+
+    location = /backup {
+    	     deny all;
+    }
+
     location / {
         # If the file exists as a static file serve it directly without
         # running all the other rewite tests on it
@@ -53,5 +71,40 @@ server {
         fastcgi_param SCRIPT_FILENAME $website_root$script;
         fastcgi_param SCRIPT_NAME $script;
         fastcgi_param PATH_INFO $path_info;
+	fastcgi_intercept_errors on;
+	
     }
+
+    	# Private files protection
+        location ~ ^/sites/.*/private/ {
+                access_log off;
+                deny all;
+        }
+        # Fighting with ImageCache? This little gem is amazing.
+        location ~ ^/sites/.*/files/imagecache/ {
+                try_files $uri @rewrite;
+        }
+        # Catch image styles for D7 too.
+        location ~ ^/sites/.*/files/styles/ {
+                try_files $uri @rewrite;
+        }
+
+        # Catch image styles for private files.
+        location ~ ^/sites/.*/private/styles/ {
+                try_files $uri @rewrite;
+        }
+
+ 
+        location ~* \.(js|css|png|jpg|jpeg|gif|ico)$ {
+		try_files $uri @drupal;
+                expires max;
+                log_not_found off;
+        }
+
+	location @drupal {
+                # Some modules enforce no slash (/) at the end of the URL
+                # Else this rewrite block wouldn't be needed (GlobalRedirect)
+                rewrite ^/(.*)$ /index.php?q=$1;
+        }
+
 }
