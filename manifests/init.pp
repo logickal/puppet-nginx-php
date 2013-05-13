@@ -29,6 +29,6 @@ class nginxphp () {
   }
   
   # install base packages
-  $sysPackages = ["build-essential", "curl", "language-pack-fr", "language-pack-en"]
+  $sysPackages = ["build-essential", "curl", "language-pack-en"]
   package { $sysPackages: ensure => "latest", }
 }
