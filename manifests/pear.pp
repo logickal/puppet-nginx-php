@@ -25,10 +25,11 @@ define nginxphp::pear_install(
   if ($all_dependency) {
     $deps = "--alldeps"
   }
+  include nginxphp::pear_upgrade
   exec{"pear-mod-install-${name}":
     command => "/usr/bin/pear install ${deps} ${name}",
-    require => [Exec["pear-upgrade"]],
-    unless  => "pear info ${name}"
+    require => [Class["nginxphp::pear_upgrade"]],
+    unless  => "/usr/bin/pear info ${name}"
   }
 }
 
@@ -52,7 +53,7 @@ define nginxphp::pear_addchannel{
   exec{"pear-channel ${name}":
     command => "/usr/bin/pear channel-discover ${name}",
     require => [Package["php-pear"], Exec["pear-autodiscover"]],
-    unless => "pear channel-info ${name}"
+    unless => "/usr/bin/pear channel-info ${name}"
   }
 }
 
@@ -73,6 +74,7 @@ define nginxphp::pear_addchannel{
 #     include nginxphp::pear_upgrade
 #
 class nginxphp::pear_upgrade{
+  include nginxphp::pear_autodiscover
   exec{"pear-upgrade":
     command => "/usr/bin/pear upgrade",
     require => [Package["php-pear"], Exec["pear-autodiscover"]]
@@ -97,7 +99,7 @@ class nginxphp::pear_upgrade{
 #
 class nginxphp::pear_autodiscover {
   exec {"pear-autodiscover":
-    command => "pear config-set auto_discover 1",
+    command => "/usr/bin/pear config-set auto_discover 1",
     require => [Package["php-pear"]]
   }
 }
